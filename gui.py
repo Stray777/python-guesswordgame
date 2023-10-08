@@ -1,5 +1,6 @@
 import tkinter as tk
 import random
+from database import Database
 
 
 class WordGuessGame:
