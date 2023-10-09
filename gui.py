@@ -1,10 +1,12 @@
 import tkinter as tk
 import random
-from database import Database
 
 
 class WordGuessGame:
-    def __init__(self, root):
+    def __init__(self, root, db):
+        # 数据库
+        self.db = db
+
         # 初始主窗口
         self.root = root
         self.root.title("猜词游戏")
@@ -36,27 +38,17 @@ class WordGuessGame:
         # 变量
         self.word = None
 
-    def get_word(self):
+    def get_word(self) -> None:
         """获取单词"""
-        with open('word.txt', 'r') as file:
-            # 判断有多少单词行
-            lines = file.readlines()
-            line_count = len(lines)
+        self.word = self.db.get_data_random('word_tb')
 
-            # 读取随机一行的单词
-            file.seek(0)
-            line = random.randint(1, line_count)
-            for i in range(line - 1):
-                file.readline()
-            self.word = file.readline().strip()
+        # label1显示乱序单词
+        wordlist = list(self.word)
+        random.shuffle(wordlist)
+        word_out_of_order = "".join(wordlist)
+        self.label1.config(text=f"乱序单词为: {word_out_of_order}")
 
-            # label1显示乱序单词
-            wordlist = list(self.word)
-            random.shuffle(wordlist)
-            word_out_of_order = "".join(wordlist)
-            self.label1.config(text=f"乱序单词为: {word_out_of_order}")
-
-    def compare_word(self):
+    def compare_word(self) -> None:
         if self.word is None:
             self.pop_up_window('错误', '尚未获取单词！', '返回')
         input_word = self.entry1.get().lower()
@@ -74,7 +66,7 @@ class WordGuessGame:
             self.entry1.delete(0, tk.END)
             self.pop_up_window('答错了', '真遗憾...答错了', '重新作答')
 
-    def pop_up_window(self, title='', label_text='', button_text=''):
+    def pop_up_window(self, title='', label_text='', button_text='') -> None:
         """弹窗"""
         # 弹窗主窗口
         toplevel = tk.Toplevel(self.root)
