@@ -2,6 +2,11 @@ import pymysql
 from tkinter import messagebox
 
 
+class DelError(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+
 class Database:
     def __init__(self):
         self.connection = None
@@ -10,6 +15,24 @@ class Database:
         self.user = 'feng'
         self.password = '123456'
         self.database = 'guess_word_game'
+
+    def del_data(self, table: str, primary_key: str) -> None:
+        """删除数据"""
+        with self.connection.cursor() as cursor:
+            # 获取主键
+            pk_query = f"SHOW KEYS FROM {table} WHERE Key_name = 'PRIMARY'"
+            cursor.execute(pk_query)
+            pk = cursor.fetchone()[4]
+            # 先查询是否存在该数据
+            query = f"SELECT * FROM {table} WHERE {pk} = '{primary_key}'"
+            cursor.execute(query)
+            if cursor.fetchone() is not None:
+                # 删除主键对应数据
+                sql = f"DELETE FROM {table} WHERE {pk} = '{primary_key}'"
+                cursor.execute(sql)
+                self.connection.commit()
+            else:
+                raise DelError("删除数据错误")
 
     def get_data(self, table: str, primary_key: str) -> tuple:
         """获取数据"""
