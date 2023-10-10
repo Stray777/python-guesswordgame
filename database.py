@@ -34,6 +34,17 @@ class Database:
             else:
                 raise DelError("删除数据错误")
 
+    def get_data_all(self, table: str) -> tuple:
+        """获取表的全部数据"""
+        try:
+            with self.connection.cursor() as cursor:
+                query = f"SELECT * FROM {table}"
+                cursor.execute(query)
+                word_tuple = cursor.fetchall()
+            return word_tuple
+        except pymysql.Error as e:
+            messagebox.showerror("数据库获取数据错误", str(e))
+
     def get_data(self, table: str, primary_key: str) -> tuple:
         """获取数据"""
         try:

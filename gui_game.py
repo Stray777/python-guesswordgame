@@ -71,9 +71,23 @@ class GameGUI:
 
         def check_word() -> None:
             """查看单词库"""
+            # 弹窗
             popup = tk.Toplevel(toplevel)
             popup.title("单词库")
-            popup.geometry(f"240x400+{(self.screen_width - 240) // 2}+{(self.screen_height - 400) // 2}")
+            popup.geometry(f"240x350+{(self.screen_width - 240) // 2}+{(self.screen_height - 350) // 2}")
+
+            # 获取单词
+            word_tuple_list = list(self.db.get_data_all("word_tb"))
+
+            # 创建组件
+            word_txt = tk.Text(popup)
+            for oneword_tuple in word_tuple_list:
+                word_txt.insert(tk.END, f"{oneword_tuple[0]}\n")
+            txt_label = tk.Label(popup, text="滑轮滚动向下继续查看")
+
+            # 组件布局
+            word_txt.pack()
+            txt_label.pack(pady='5')
 
         toplevel = tk.Toplevel(self.root)
         toplevel.title("单词库")
