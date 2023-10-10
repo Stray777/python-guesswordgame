@@ -11,6 +11,22 @@ class Database:
         self.password = '123456'
         self.database = 'guess_word_game'
 
+    def get_data(self, table: str, primary_key: str) -> tuple:
+        """获取数据"""
+        try:
+            with self.connection.cursor() as cursor:
+                # 获取主键
+                pk_query = f"SHOW KEYS FROM {table} WHERE Key_name = 'PRIMARY'"
+                cursor.execute(pk_query)
+                pk = cursor.fetchone()[4]
+                # 查询主键对应数据
+                query = f"SELECT * FROM {table} WHERE {pk} = '{primary_key}'"
+                cursor.execute(query)
+                row = cursor.fetchone()
+            return row
+        except Exception as e:
+            messagebox.showerror("获取数据异常", str(e))
+
     def get_data_random(self, table: str) -> str:
         """获取指定数据表的随意一行数据"""
         try:
@@ -24,18 +40,15 @@ class Database:
 
     def insert_data(self, table: str, data: dict[str]) -> None:
         """插入数据"""
-        try:
-            with self.connection.cursor() as cursor:
-                # 构建 SQL 插入语句
-                columns = ', '.join(data.keys())
-                values = ', '.join(['%s' for _ in data])
-                sql = f"INSERT INTO {table} ({columns}) VALUES ({values})"
+        with self.connection.cursor() as cursor:
+            # 构建 SQL 插入语句
+            columns = ', '.join(data.keys())
+            values = ', '.join(['%s' for _ in data])
+            sql = f"INSERT INTO {table} ({columns}) VALUES ({values})"
 
-                # 执行插入操作
-                cursor.execute(sql, tuple(data.values()))
-                self.connection.commit()
-        except pymysql.Error as e:
-            messagebox.showerror('数据库插入数据异常', str(e))
+            # 执行插入操作
+            cursor.execute(sql, tuple(data.values()))
+            self.connection.commit()
 
     def close_database(self) -> None:
         """关闭数据库"""

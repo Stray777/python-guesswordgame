@@ -2,7 +2,7 @@ import tkinter as tk
 import random
 
 
-class WordGuessGame:
+class GameGUI:
     def __init__(self, root, db):
         # 数据库
         self.db = db
