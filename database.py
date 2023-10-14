@@ -16,19 +16,25 @@ class Database:
         self.password = '123456'
         self.database = 'guess_word_game'
 
-    def del_data(self, table: str, primary_key: str) -> None:
+    def create_table(self, table_name: str, columns: list) -> None:
+        """创建数据表"""
+        try:
+            with self.connection.cursor() as cursor:
+                sql = f"CREATE TABLE IF NOT EXISTS {table_name} ({', '.join(columns)});"
+                cursor.execute(sql)
+                self.connection.commit()
+        except pymysql.Error as e:
+            messagebox.showerror("创建数据表错误", str(e))
+
+    def del_data(self, table: str, unique_key: str, column_name: str) -> None:
         """删除数据"""
         with self.connection.cursor() as cursor:
-            # 获取主键
-            pk_query = f"SHOW KEYS FROM {table} WHERE Key_name = 'PRIMARY'"
-            cursor.execute(pk_query)
-            pk = cursor.fetchone()[4]
             # 先查询是否存在该数据
-            query = f"SELECT * FROM {table} WHERE {pk} = '{primary_key}'"
+            query = f"SELECT * FROM {table} WHERE {column_name} = '{unique_key}'"
             cursor.execute(query)
             if cursor.fetchone() is not None:
                 # 删除主键对应数据
-                sql = f"DELETE FROM {table} WHERE {pk} = '{primary_key}'"
+                sql = f"DELETE FROM {table} WHERE {column_name} = '{unique_key}'"
                 cursor.execute(sql)
                 self.connection.commit()
             else:
@@ -45,16 +51,12 @@ class Database:
         except pymysql.Error as e:
             messagebox.showerror("数据库获取数据错误", str(e))
 
-    def get_data(self, table: str, primary_key: str) -> tuple:
+    def get_data(self, table: str, unique_key: str, column_name: str) -> tuple:
         """获取数据"""
         try:
             with self.connection.cursor() as cursor:
-                # 获取主键
-                pk_query = f"SHOW KEYS FROM {table} WHERE Key_name = 'PRIMARY'"
-                cursor.execute(pk_query)
-                pk = cursor.fetchone()[4]
                 # 查询主键对应数据
-                query = f"SELECT * FROM {table} WHERE {pk} = '{primary_key}'"
+                query = f"SELECT * FROM {table} WHERE {column_name} = '{unique_key}'"
                 cursor.execute(query)
                 row = cursor.fetchone()
             return row
@@ -73,7 +75,7 @@ class Database:
             messagebox.showerror("获取数据错误", str(e))
 
     def insert_data(self, table: str, data: dict[str]) -> None:
-        """插入数据"""
+        """向表中插入数据"""
         with self.connection.cursor() as cursor:
             # 构建 SQL 插入语句
             columns = ', '.join(data.keys())

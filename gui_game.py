@@ -49,6 +49,9 @@ class GameGUI:
         def add_word() -> None:
             """添加单词"""
             word = add_entry.get()
+            if word == '':
+                tk.messagebox.showerror("添加单词失败", "输入框为空")
+                return None
             data = {
                 "word": word
             }
@@ -63,7 +66,7 @@ class GameGUI:
             """删除单词"""
             word = del_entry.get()
             try:
-                self.db.del_data("word_tb", word)
+                self.db.del_data("word_tb", word, "word")
                 del_entry.delete(0, tk.END)
                 self.pop_up_window("成功", f"已删除单词:{word}", "返回")
             except DelError as e:

@@ -43,8 +43,16 @@ class LoginGUI:
                 'user_name': username,
                 'user_password': password
             }
+            columns = [
+                "id INT AUTO_INCREMENT PRIMARY KEY",
+                "word VARCHAR(40) UNIQUE",
+                "frequency INT NOT NULL DEFAULT 1",
+                # "FOREIGN KEY (word) REFERENCS word_tb(word)"
+            ]
+
             try:
                 self.db.insert_data('user_tb', data)
+                self.db.create_table(f'{username}_word_tb', columns)
                 toplevel.destroy()
                 tk.messagebox.showinfo("成功", "注册成功")
             except pymysql.Error:
@@ -73,7 +81,7 @@ class LoginGUI:
         """登录按钮命令"""
         username_entry = self.username_entry.get()
         password_entry = self.password_entry.get()
-        data = self.db.get_data('user_tb', username_entry)
+        data = self.db.get_data('user_tb', username_entry, 'user_name')
         if data is None:
             tk.messagebox.showerror("错误", "用户名不存在")
         elif data[1] != password_entry:
@@ -81,5 +89,5 @@ class LoginGUI:
         else:
             self.root.destroy()  # 关闭登录窗口
             game_root = tk.Tk()  # 创建游戏窗口
-            game = GameGUI(game_root, self.db)  # 实例化游戏对象
+            GameGUI(game_root, self.db)  # 实例化游戏对象
             game_root.mainloop()  # 运行主窗口
